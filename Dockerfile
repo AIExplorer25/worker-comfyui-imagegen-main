@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Prefer binary wheels over source distributions for faster pip installations
 ENV PIP_PREFER_BINARY=1
 # Ensures output from python is printed immediately to the terminal without buffering
-ENV PYTHONUNBUFFERED=1 
+ENV PYTHONUNBUFFERED=1
 # Speed up some cmake builds
 ENV CMAKE_BUILD_PARALLEL_LEVEL=8
 
@@ -29,33 +29,31 @@ RUN pip install hf_transfer
 RUN pip install uv
 
 
-# Install comfy-cli pip install torch==2.6.0+cu124 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
+# Install comfy-cli pip install torch==2.5.1+cu124 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
 RUN uv pip install comfy-cli --system
 RUN pip install torch==2.6.0+cu124 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
 # Install ComfyUI
-RUN /usr/bin/yes | comfy --workspace /comfyui install --version 0.3.34 --nvidia
+RUN /usr/bin/yes | comfy --workspace /comfyui install --version 0.3.30 --cuda-version 12.4 --nvidia
 ADD src/requirements.txt ./
 RUN pip install -r requirements.txt
 RUN cd /comfyui/custom_nodes && \
     git clone https://github.com/cubiq/ComfyUI_essentials.git && \
     cd ComfyUI_essentials && \
     pip install -r requirements.txt
-    
+
 RUN cd /comfyui/custom_nodes && \
     git clone https://github.com/city96/ComfyUI-GGUF.git && \
     cd ComfyUI-GGUF && \
     pip install -r requirements.txt
 
 RUN cd /comfyui/custom_nodes && \
-    git clone https://github.com/ssitu/ComfyUI_UltimateSDUpscale.git && \
-    cd ComfyUI_UltimateSDUpscale && \
-    pip install -r requirements.txt
+    git clone https://github.com/ssitu/ComfyUI_UltimateSDUpscale.git
 
 RUN cd /comfyui/custom_nodes && \
     git clone https://github.com/WASasquatch/was-node-suite-comfyui.git && \
     cd was-node-suite-comfyui && \
     pip install -r requirements.txt
-    
+
 RUN cd /comfyui/custom_nodes && \
     git clone https://github.com/kijai/ComfyUI-KJNodes.git && \
     cd ComfyUI-KJNodes && \
@@ -75,19 +73,17 @@ RUN cd /comfyui/custom_nodes && \
 
 RUN cd /comfyui/custom_nodes && \
     git clone https://github.com/Extraltodeus/Skimmed_CFG.git
-    
+
 RUN cd /comfyui/custom_nodes && \
-    git clone https://github.com/omar92/ComfyUI-QualityOfLifeSuit_Omar92.git && \
-    cd ComfyUI-QualityOfLifeSuit_Omar92 && \
-    pip install -r requirements.txt
+    git clone https://github.com/omar92/ComfyUI-QualityOfLifeSuit_Omar92.git
 
 RUN cd /comfyui/custom_nodes && \
     git clone https://github.com/Clybius/ComfyUI-Extra-Samplers.git && \
     cd ComfyUI-Extra-Samplers && \
     pip install -r requirements.txt
-    
+
 RUN cd /comfyui/custom_nodes && \
-    git clone https://github.com/rgthree/rgthree-comfy.git 
+    git clone https://github.com/rgthree/rgthree-comfy.git
 
 
 
@@ -135,13 +131,13 @@ RUN mkdir -p models/checkpoints models/vae models/unet models/clip models/clip_v
 ADD loras/ ./models/loras/
 
 RUN cd /comfyui/models/clip && \
-    huggingface-cli download zer0int/CLIP-GmP-ViT-L-14 ViT-L-14-TEXT-detail-improved-hiT-GmP-HF.safetensors --local-dir ./ 
-    
+    huggingface-cli download zer0int/CLIP-GmP-ViT-L-14 ViT-L-14-TEXT-detail-improved-hiT-GmP-HF.safetensors --local-dir ./
+
 RUN cd /comfyui/models/clip && \
-    huggingface-cli download mcmonkey/google_t5-v1_1-xxl_encoderonly t5xxl_fp8_e4m3fn.safetensors --local-dir ./ 
-    
+    huggingface-cli download mcmonkey/google_t5-v1_1-xxl_encoderonly t5xxl_fp8_e4m3fn.safetensors --local-dir ./
+
 RUN cd /comfyui/models/unet && \
-    huggingface-cli download city96/FLUX.1-dev-gguf flux1-dev-Q8_0.gguf --local-dir ./ 
+    huggingface-cli download city96/FLUX.1-dev-gguf flux1-dev-Q8_0.gguf --local-dir ./
 
 # Stage 3: Final image
 FROM base AS final
