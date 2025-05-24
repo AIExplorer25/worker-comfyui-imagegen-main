@@ -31,7 +31,7 @@ RUN pip install uv
 RUN uv pip install comfy-cli --system
 RUN pip install torch==2.6.0+cu124 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
 # Install ComfyUI
-RUN /usr/bin/yes | comfy --workspace /comfyui install --version 0.3.29 --nvidia
+RUN /usr/bin/yes | comfy --workspace /comfyui install --version 0.3.34 --nvidia
 ADD src/requirements.txt ./
 RUN pip install -r requirements.txt
 RUN cd /comfyui/custom_nodes && \
@@ -45,8 +45,8 @@ RUN cd /comfyui/custom_nodes && \
     pip install -r requirements.txt
 
 RUN cd /comfyui/custom_nodes && \
-    git clone https://github.com/yolain/ComfyUI-Easy-Use.git && \
-    cd ComfyUI-Easy-Use && \
+    git clone https://github.com/ssitu/ComfyUI_UltimateSDUpscale.git && \
+    cd ComfyUI_UltimateSDUpscale && \
     pip install -r requirements.txt
 
 RUN cd /comfyui/custom_nodes && \
@@ -61,24 +61,29 @@ RUN cd /comfyui/custom_nodes && \
 
 
 RUN cd /comfyui/custom_nodes && \
-    git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git && \
-    cd ComfyUI-VideoHelperSuite && \
+    git clone https://github.com/ltdrdata/ComfyUI-Inspire-Pack.git && \
+    cd ComfyUI-Inspire-Pack && \
     pip install -r requirements.txt
 
 RUN cd /comfyui/custom_nodes && \
-    git clone https://github.com/Fannovel16/ComfyUI-Frame-Interpolation.git
+    git clone https://github.com/filliptm/ComfyUI_Fill-Nodes.git && \
+    cd ComfyUI_Fill-Nodes && \
+    pip install -r requirements.txt
 
 
 RUN cd /comfyui/custom_nodes && \
-    git clone https://github.com/pollockjj/ComfyUI-MultiGPU.git
+    git clone https://github.com/Extraltodeus/Skimmed_CFG.git
     
+RUN cd /comfyui/custom_nodes && \
+    git clone https://github.com/omar92/ComfyUI-QualityOfLifeSuit_Omar92.git && \
+    cd ComfyUI-QualityOfLifeSuit_Omar92 && \
+    pip install -r requirements.txt
 
 RUN cd /comfyui/custom_nodes && \
-    git clone https://github.com/Smirnov75/ComfyUI-mxToolkit.git  
-
-RUN cd /comfyui/custom_nodes && \
-    git clone https://github.com/pythongosssss/ComfyUI-Custom-Scripts.git 
-
+    git clone https://github.com/Clybius/ComfyUI-Extra-Samplers.git && \
+    cd ComfyUI-Extra-Samplers && \
+    pip install -r requirements.txt
+    
 RUN cd /comfyui/custom_nodes && \
     git clone https://github.com/rgthree/rgthree-comfy.git     
     
