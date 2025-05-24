@@ -90,14 +90,7 @@ RUN cd /comfyui/custom_nodes && \
     git clone https://github.com/rgthree/rgthree-comfy.git 
 
 
-RUN cd /comfyui/models/clip && \
-    huggingface-cli download zer0int/CLIP-GmP-ViT-L-14 ViT-L-14-TEXT-detail-improved-hiT-GmP-HF.safetensors --local-dir ./ 
-    
-RUN cd /comfyui/models/clip && \
-    huggingface-cli download mcmonkey/google_t5-v1_1-xxl_encoderonly t5xxl_fp8_e4m3fn.safetensors --local-dir ./ 
-    
-RUN cd /comfyui/models/unet && \
-    huggingface-cli download city96/FLUX.1-dev-gguf flux1-dev-Q8_0.gguf --local-dir ./ 
+
 
     
 # Change working directory to ComfyUI
@@ -141,7 +134,14 @@ RUN mkdir -p models/checkpoints models/vae models/unet models/clip models/clip_v
 
 ADD loras/ ./models/loras/
 
-
+RUN cd /comfyui/models/clip && \
+    huggingface-cli download zer0int/CLIP-GmP-ViT-L-14 ViT-L-14-TEXT-detail-improved-hiT-GmP-HF.safetensors --local-dir ./ 
+    
+RUN cd /comfyui/models/clip && \
+    huggingface-cli download mcmonkey/google_t5-v1_1-xxl_encoderonly t5xxl_fp8_e4m3fn.safetensors --local-dir ./ 
+    
+RUN cd /comfyui/models/unet && \
+    huggingface-cli download city96/FLUX.1-dev-gguf flux1-dev-Q8_0.gguf --local-dir ./ 
 
 # Stage 3: Final image
 FROM base AS final
