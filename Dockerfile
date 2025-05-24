@@ -33,8 +33,9 @@ RUN uv pip install comfy-cli --system
 RUN pip install torch==2.6.0+cu124 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
 # Install ComfyUI
 RUN /usr/bin/yes | comfy --workspace /comfyui install --version 0.3.34 --cuda-version 12.4 --nvidia
-ADD src/requirements.txt ./
-RUN pip install -r requirements.txt
+#ADD src/requirements.txt ./
+#RUN pip install -r requirements.txt
+RUN pip install xformers==0.0.29.post3 --no-deps
 RUN cd /comfyui/custom_nodes && \
     git clone https://github.com/cubiq/ComfyUI_essentials.git && \
     cd ComfyUI_essentials && \
