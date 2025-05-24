@@ -23,8 +23,7 @@ RUN apt-get update && apt-get install -y \
 
 # Clean up to reduce image size
 RUN apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
-RUN pip install huggingface_hub[hf_transfer]
-RUN pip install hf_transfer
+
 # Install uv
 RUN pip install uv
 
@@ -33,7 +32,7 @@ RUN pip install uv
 RUN uv pip install comfy-cli --system
 RUN pip install torch==2.6.0+cu124 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
 # Install ComfyUI
-RUN /usr/bin/yes | comfy --workspace /comfyui install --version 0.3.30 --cuda-version 12.4 --nvidia
+RUN /usr/bin/yes | comfy --workspace /comfyui install --version 0.3.34 --cuda-version 12.4 --nvidia
 ADD src/requirements.txt ./
 RUN pip install -r requirements.txt
 RUN cd /comfyui/custom_nodes && \
@@ -120,30 +119,43 @@ FROM base AS downloader
 
 # ARG HUGGINGFACE_ACCESS_TOKEN
 # Set default model type if none is provided
-ARG MODEL_TYPE=wan
+ARG MODEL_TYPE=flux
 
 # Change working directory to ComfyUI
 WORKDIR /comfyui
 
 # Create necessary directories upfront
-RUN mkdir -p models/checkpoints models/vae models/unet models/clip models/clip_vision models/loras
+RUN mkdir -p models/checkpoints models/vae models/unet models/clip models/clip_vision models/loras  models/upscale_models 
 
 ADD loras/ ./models/loras/
+ADD vae/ ./models/vae/
 
-RUN cd /comfyui/models/clip && \
-    huggingface-cli download zer0int/CLIP-GmP-ViT-L-14 ViT-L-14-TEXT-detail-improved-hiT-GmP-HF.safetensors --local-dir ./
-
-RUN cd /comfyui/models/clip && \
-    huggingface-cli download mcmonkey/google_t5-v1_1-xxl_encoderonly t5xxl_fp8_e4m3fn.safetensors --local-dir ./
-
-RUN cd /comfyui/models/unet && \
-    huggingface-cli download city96/FLUX.1-dev-gguf flux1-dev-Q8_0.gguf --local-dir ./
+# Download checkpoints/vae/unet/clip models to include in image based on model type
+RUN bash -c '\
+  if [ "$MODEL_TYPE" = "flux" ]; then \
+    wget -O models/clip/ViT-L-14-TEXT-detail-improved-hiT-GmP-HF.safetensors https://huggingface.co/zer0int/CLIP-GmP-ViT-L-14/resolve/main/ViT-L-14-TEXT-detail-improved-hiT-GmP-HF.safetensors && \
+    wget -O models/clip/t5xxl_fp8_e4m3fn.safetensors https://huggingface.co/mcmonkey/google_t5-v1_1-xxl_encoderonly/resolve/main/t5xxl_fp8_e4m3fn.safetensors && \
+    wget -O models/unet/flux1-dev-Q8_0.gguf https://huggingface.co/city96/FLUX.1-dev-gguf/resolve/main/flux1-dev-Q8_0.gguf && \
+    wget -O models/upscale_models/4x_NMKD-Superscale-SP_178000_G.pth https://huggingface.co/gemasai/4x_NMKD-Superscale-SP_178000_G/resolve/main/4x_NMKD-Superscale-SP_178000_G.pth \
+  elif [ "$MODEL_TYPE" = "sd3" ]; then \
+    echo "SD3 selected, skipping downloads (uncomment lines to enable)"; \
+  elif [ "$MODEL_TYPE" = "flux1-schnell" ]; then \
+    wget -O models/unet/flux1-schnell.safetensors https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/flux1-schnell.safetensors && \
+    wget -O models/clip/clip_l.safetensors https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors && \
+    wget -O models/clip/t5xxl_fp8_e4m3fn.safetensors https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp8_e4m3fn.safetensors && \
+    wget -O models/vae/ae.safetensors https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/ae.safetensors; \
+  elif [ "$MODEL_TYPE" = "flux1-dev" ]; then \
+    wget -O models/clip/clip_l.safetensors https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors && \
+    wget -O models/clip/t5xxl_fp8_e4m3fn.safetensors https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp8_e4m3fn.safetensors; \
+  elif [ "$MODEL_TYPE" = "flux1-dev-fp8" ]; then \
+    wget -O models/checkpoints/flux1-dev-fp8.safetensors https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/flux1-dev-fp8.safetensors; \
+  fi'
 
 # Stage 3: Final image
 FROM base AS final
 
 # Copy models from stage 2 to the final image
-# COPY --from=downloader /comfyui/models /comfyui/models
+COPY --from=downloader /comfyui/models /comfyui/models
 
 # Start container
 CMD ["/start.sh"]
